@@ -71,7 +71,7 @@ export function CaiDatPage() {
     window.location.reload();
   };
 
-  const Section = ({ title, icon, children }: { title: string; icon?: typeof Settings; children: React.ReactNode }) => (
+  const Section = ({ title, icon: IconComp, children }: { title: string; icon?: typeof Settings; children: React.ReactNode }) => (
     <section>
       <div style={{
         display: 'flex',
@@ -79,7 +79,7 @@ export function CaiDatPage() {
         gap: 'var(--space-2)',
         marginBottom: 'var(--space-3)',
       }}>
-        {icon && <icon size={14} color="var(--text-muted)" />}
+        {IconComp && <IconComp size={14} color="var(--text-muted)" />}
         <span style={{
           fontSize: 'var(--text-xs)',
           fontWeight: 'var(--weight-semibold)',

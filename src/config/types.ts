@@ -54,7 +54,7 @@ export const STORAGE_KEYS = {
   THEME: 'hcm202_theme',
 } as const;
 
-export type TabId = 'hoc' | 'kiemtra' | 'toanbo' | 'caidat';
+export type TabId = 'intro' | 'hoc' | 'kiemtra' | 'toanbo' | 'caidat';
 
 export function createDefaultProgress(id: number): CardProgress {
   return {

@@ -31,14 +31,12 @@ function useIsDesktop() {
 export default function App() {
   const [activeTab, setActiveTab] = useState<TabId>(() => {
     try {
-      return localStorage.getItem(INTRO_SEEN_KEY) ? 'hoc' : ('intro' as TabId);
+      return localStorage.getItem(INTRO_SEEN_KEY) ? 'hoc' : 'intro';
     } catch {
       return 'hoc';
     }
   });
   const isDesktop = useIsDesktop();
-
-  const showIntro = activeTab === ('intro' as TabId);
 
   const handleIntroEnter = (tab: TabId) => {
     try { localStorage.setItem(INTRO_SEEN_KEY, '1'); } catch { /* */ }
@@ -47,20 +45,13 @@ export default function App() {
 
   const renderPage = () => {
     switch (activeTab) {
+      case 'intro': return <IntroPage onEnter={handleIntroEnter} />;
       case 'hoc': return <HocPage />;
       case 'kiemtra': return <KiemTraPage />;
       case 'toanbo': return <ToanBoPage />;
       case 'caidat': return <CaiDatPage />;
     }
   };
-
-  if (showIntro) {
-    return (
-      <ThemeProvider>
-        <IntroPage onEnter={handleIntroEnter} />
-      </ThemeProvider>
-    );
-  }
 
   if (isDesktop) {
     return (

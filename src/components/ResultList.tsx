@@ -1,5 +1,6 @@
 import type { Question } from '../config/types';
 import { FilterChip, Badge } from '../ui/index';
+import { AnswerOption } from '../ui/AnswerOption';
 
 interface Answer {
   questionId: number;
@@ -22,7 +23,7 @@ export function ResultList({ questions, answers, filter, onFilterChange }: Resul
   const filtered = filter === 'wrong' ? answers.filter((a) => !a.correct) : answers;
 
   return (
-    <div style={{ padding: 'var(--space-5) var(--space-4)' }}>
+    <div style={{ padding: 'var(--space-5) var(--space-4)', maxWidth: '720px', margin: '0 auto' }}>
       {/* Score summary */}
       <div style={{
         display: 'grid',
@@ -36,6 +37,7 @@ export function ResultList({ questions, answers, filter, onFilterChange }: Resul
           borderRadius: 'var(--radius-lg)',
           background: 'var(--bg-surface)',
           border: '1px solid var(--border-light)',
+          boxShadow: 'var(--shadow-xs)',
         }}>
           <div style={{
             fontSize: 'var(--text-2xl)',
@@ -46,12 +48,14 @@ export function ResultList({ questions, answers, filter, onFilterChange }: Resul
           </div>
           <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: '2px' }}>Điểm số</div>
         </div>
+
         <div style={{
           textAlign: 'center',
           padding: 'var(--space-4)',
           borderRadius: 'var(--radius-lg)',
           background: 'var(--color-success-soft)',
-          border: '1px solid transparent',
+          border: '1px solid var(--color-success)',
+          boxShadow: 'var(--shadow-xs)',
         }}>
           <div style={{
             fontSize: 'var(--text-2xl)',
@@ -60,14 +64,16 @@ export function ResultList({ questions, answers, filter, onFilterChange }: Resul
           }}>
             {correctCount}
           </div>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-success-text)', marginTop: '2px', opacity: 0.8 }}>Đúng</div>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-success-text)', marginTop: '2px', fontWeight: 'var(--weight-medium)' }}>Chính xác</div>
         </div>
+
         <div style={{
           textAlign: 'center',
           padding: 'var(--space-4)',
           borderRadius: 'var(--radius-lg)',
           background: 'var(--color-danger-soft)',
-          border: '1px solid transparent',
+          border: '1px solid var(--color-danger)',
+          boxShadow: 'var(--shadow-xs)',
         }}>
           <div style={{
             fontSize: 'var(--text-2xl)',
@@ -76,7 +82,7 @@ export function ResultList({ questions, answers, filter, onFilterChange }: Resul
           }}>
             {wrongCount}
           </div>
-          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-danger-text)', marginTop: '2px', opacity: 0.8 }}>Sai</div>
+          <div style={{ fontSize: 'var(--text-xs)', color: 'var(--color-danger-text)', marginTop: '2px', fontWeight: 'var(--weight-medium)' }}>Chưa đúng</div>
         </div>
       </div>
 
@@ -84,57 +90,69 @@ export function ResultList({ questions, answers, filter, onFilterChange }: Resul
       <div style={{
         display: 'flex',
         gap: 'var(--space-2)',
-        marginBottom: 'var(--space-4)',
+        marginBottom: 'var(--space-5)',
       }}>
         <FilterChip active={filter === 'all'} count={total} onClick={() => onFilterChange('all')}>
-          Tất cả
+          Tất cả ({total})
         </FilterChip>
         <FilterChip active={filter === 'wrong'} count={wrongCount} onClick={() => onFilterChange('wrong')}>
-          Sai
+          Các câu sai ({wrongCount})
         </FilterChip>
       </div>
 
       {/* Answer list */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-5)' }}>
         {filtered.map((a, i) => {
           const q = questions.find((q) => q.id === a.questionId);
           if (!q) return null;
           return (
             <div key={i} style={{
-              padding: 'var(--space-3) var(--space-4)',
-              borderRadius: 'var(--radius-md)',
-              border: '1.5px solid',
-              borderColor: a.correct ? 'var(--color-success)' : 'var(--color-danger)',
-              background: a.correct ? 'var(--color-success-soft)' : 'var(--color-danger-soft)',
+              padding: 'var(--space-5)',
+              borderRadius: 'var(--radius-xl)',
+              border: `1.5px solid ${a.correct ? 'var(--color-success)' : 'var(--color-danger)'}`,
+              background: 'var(--bg-surface)',
+              boxShadow: 'var(--shadow-sm)',
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 'var(--space-4)',
             }}>
-              <div style={{ display: 'flex', alignItems: 'flex-start', gap: 'var(--space-2)', marginBottom: 'var(--space-2)' }}>
-                <Badge variant={a.correct ? 'success' : 'danger'} size="sm">
-                  {a.correct ? 'Đúng' : 'Sai'}
-                </Badge>
-                <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-semibold)', color: 'var(--text-muted)' }}>
-                  Câu {q.id}
-                </span>
-              </div>
-              <div style={{ fontSize: 'var(--text-sm)', lineHeight: 'var(--leading-relaxed)', color: 'var(--text-primary)', marginBottom: 'var(--space-2)' }}>
-                {q.question}
-              </div>
-              <div style={{ fontSize: 'var(--text-sm)', lineHeight: 'var(--leading-relaxed)' }}>
-                <span style={{ color: 'var(--text-muted)' }}>Bạn: </span>
-                <span style={{
-                  color: a.correct ? 'var(--color-success-text)' : 'var(--color-danger-text)',
-                  fontWeight: 'var(--weight-medium)',
-                }}>
-                  {q.options.find((o) => o.key === a.selected)?.text ?? a.selected}
-                </span>
-              </div>
-              {!a.correct && (
-                <div style={{ fontSize: 'var(--text-sm)', lineHeight: 'var(--leading-relaxed)', marginTop: 'var(--space-1)' }}>
-                  <span style={{ color: 'var(--text-muted)' }}>Đáp án: </span>
-                  <span style={{ color: 'var(--color-success-text)', fontWeight: 'var(--weight-medium)' }}>
-                    {q.correctText}
+              {/* Card Header */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+                  <Badge variant={a.correct ? 'success' : 'danger'} size="sm">
+                    {a.correct ? 'Đúng' : 'Sai'}
+                  </Badge>
+                  <span style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-bold)', color: 'var(--color-primary)' }}>
+                    CÂU {q.id}
                   </span>
                 </div>
-              )}
+              </div>
+
+              {/* Question Text */}
+              <div style={{ fontSize: 'var(--text-base)', lineHeight: 'var(--leading-relaxed)', color: 'var(--text-primary)', fontWeight: 'var(--weight-semibold)' }}>
+                {q.question}
+              </div>
+
+              {/* Display ALL options with user selection and correct key highlight */}
+              <div role="radiogroup" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+                {q.options.map((opt, idx) => {
+                  const isUserSelected = a.selected === opt.key;
+                  const isCorrectAnswer = q.correctKey === opt.key;
+
+                  return (
+                    <AnswerOption
+                      key={opt.key}
+                      option={opt}
+                      index={idx}
+                      selected={isUserSelected}
+                      correct={isCorrectAnswer}
+                      showResult={true}
+                      disabled={true}
+                      onClick={() => {}}
+                    />
+                  );
+                })}
+              </div>
             </div>
           );
         })}
@@ -142,3 +160,4 @@ export function ResultList({ questions, answers, filter, onFilterChange }: Resul
     </div>
   );
 }
+

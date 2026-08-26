@@ -4,6 +4,8 @@ import {
   ClipboardCheck,
   Library,
   Settings,
+  Info,
+  Sparkles,
 } from 'lucide-react';
 import type { ReactNode } from 'react';
 
@@ -18,9 +20,10 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: 'hoc', label: 'Học', icon: BookOpen },
+  { id: 'intro', label: 'Giới thiệu', icon: Info },
+  { id: 'hoc', label: 'Học bài', icon: BookOpen },
   { id: 'kiemtra', label: 'Kiểm tra', icon: ClipboardCheck },
-  { id: 'toanbo', label: 'Toàn bộ', icon: Library },
+  { id: 'toanbo', label: 'Ngân hàng câu', icon: Library },
   { id: 'caidat', label: 'Cài đặt', icon: Settings },
 ];
 
@@ -35,7 +38,9 @@ export function Sidebar({ active, onChange }: NavigationProps) {
     <aside style={{
       width: 'var(--sidebar-width)',
       height: '100dvh',
-      background: 'var(--bg-surface)',
+      background: 'var(--bg-glass)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       borderRight: '1px solid var(--border-light)',
       display: 'flex',
       flexDirection: 'column',
@@ -43,31 +48,58 @@ export function Sidebar({ active, onChange }: NavigationProps) {
       left: 0,
       top: 0,
       zIndex: 40,
+      boxShadow: 'var(--shadow-sm)',
     }}>
       {/* Logo area */}
       <div style={{
-        padding: 'var(--space-4)',
+        padding: 'var(--space-5) var(--space-5)',
         borderBottom: '1px solid var(--border-light)',
+        display: 'flex',
+        alignItems: 'center',
+        gap: 'var(--space-3)',
       }}>
         <div style={{
-          fontSize: 'var(--text-base)',
-          fontWeight: 'var(--weight-bold)',
-          color: 'var(--text-primary)',
-          letterSpacing: '-0.01em',
+          width: '38px',
+          height: '38px',
+          borderRadius: 'var(--radius-md)',
+          background: 'var(--color-primary-gradient)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: '#FFFFFF',
+          boxShadow: 'var(--shadow-glow)',
         }}>
-          HCM202
+          <Sparkles size={20} />
         </div>
-        <div style={{
-          fontSize: 'var(--text-xs)',
-          color: 'var(--text-muted)',
-          marginTop: '2px',
-        }}>
-          Tư tưởng Hồ Chí Minh
+        <div>
+          <div style={{
+            fontSize: 'var(--text-lg)',
+            fontWeight: 'var(--weight-bold)',
+            color: 'var(--text-primary)',
+            letterSpacing: '-0.02em',
+            lineHeight: 1.1,
+          }}>
+            HCM202
+          </div>
+          <div style={{
+            fontSize: 'var(--text-xs)',
+            color: 'var(--text-muted)',
+            marginTop: '2px',
+            fontWeight: 'var(--weight-medium)',
+          }}>
+            Tư tưởng Hồ Chí Minh
+          </div>
         </div>
       </div>
 
       {/* Nav items */}
-      <nav style={{ padding: 'var(--space-3) var(--space-2)', flex: 1, display: 'flex', flexDirection: 'column', gap: 'var(--space-1)' }}>
+      <nav style={{
+        padding: 'var(--space-4) var(--space-3)',
+        flex: 1,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: 'var(--space-2)'
+      }}>
         {NAV_ITEMS.map((item) => {
           const isActive = active === item.id;
           const Icon = item.icon;
@@ -79,23 +111,62 @@ export function Sidebar({ active, onChange }: NavigationProps) {
                 display: 'flex',
                 alignItems: 'center',
                 gap: 'var(--space-3)',
-                padding: '9px 12px',
+                padding: '11px 14px',
                 borderRadius: 'var(--radius-md)',
                 fontSize: 'var(--text-sm)',
-                fontWeight: isActive ? 'var(--weight-semibold)' : 'var(--weight-normal)',
+                fontWeight: isActive ? 'var(--weight-semibold)' : 'var(--weight-medium)',
                 color: isActive ? 'var(--color-primary)' : 'var(--text-secondary)',
                 background: isActive ? 'var(--color-primary-soft)' : 'transparent',
+                border: isActive ? '1px solid rgba(16, 185, 129, 0.25)' : '1px solid transparent',
                 transition: 'all var(--transition-fast)',
                 textAlign: 'left',
                 width: '100%',
+                boxShadow: isActive ? 'var(--shadow-xs)' : 'none',
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'var(--bg-hover)';
+                  e.currentTarget.style.color = 'var(--text-primary)';
+                }
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) {
+                  e.currentTarget.style.background = 'transparent';
+                  e.currentTarget.style.color = 'var(--text-secondary)';
+                }
               }}
             >
-              <Icon size={17} strokeWidth={isActive ? 2.2 : 1.8} />
-              {item.label}
+              <Icon size={18} strokeWidth={isActive ? 2.2 : 1.8} />
+              <span style={{ flex: 1 }}>{item.label}</span>
+              {isActive && (
+                <div style={{
+                  width: '6px',
+                  height: '6px',
+                  borderRadius: '50%',
+                  background: 'var(--color-primary)',
+                  boxShadow: '0 0 8px var(--color-primary)',
+                }} />
+              )}
             </button>
           );
         })}
       </nav>
+
+      {/* Footer info badge */}
+      <div style={{
+        padding: 'var(--space-4)',
+        margin: 'var(--space-3)',
+        borderRadius: 'var(--radius-md)',
+        background: 'var(--bg-inset)',
+        border: '1px solid var(--border-light)',
+      }}>
+        <div style={{ fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-semibold)', color: 'var(--text-primary)' }}>
+          Hệ thống Leitner SRS
+        </div>
+        <div style={{ fontSize: '11px', color: 'var(--text-muted)', marginTop: '2px' }}>
+          Tối ưu ghi nhớ lâu dài
+        </div>
+      </div>
     </aside>
   );
 }
@@ -105,15 +176,18 @@ export function BottomNav({ active, onChange }: NavigationProps) {
   return (
     <nav style={{
       display: 'grid',
-      gridTemplateColumns: 'repeat(4, 1fr)',
+      gridTemplateColumns: `repeat(${NAV_ITEMS.length}, 1fr)`,
       borderTop: '1px solid var(--border-light)',
-      background: 'var(--bg-surface)',
+      background: 'var(--bg-glass)',
+      backdropFilter: 'blur(16px)',
+      WebkitBackdropFilter: 'blur(16px)',
       paddingBottom: 'env(safe-area-inset-bottom, 0)',
       position: 'fixed',
       bottom: 0,
       left: 0,
       right: 0,
       zIndex: 40,
+      boxShadow: '0 -4px 16px rgba(0, 0, 0, 0.05)',
     }}>
       {NAV_ITEMS.map((item) => {
         const isActive = active === item.id;
@@ -128,11 +202,12 @@ export function BottomNav({ active, onChange }: NavigationProps) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
               gap: '3px',
-              padding: '8px 4px 6px',
+              padding: '8px 2px 6px',
               color: isActive ? 'var(--color-primary)' : 'var(--text-muted)',
               background: 'transparent',
-              transition: 'color var(--transition-fast)',
+              transition: 'all var(--transition-fast)',
               minHeight: 'var(--nav-height)',
               position: 'relative',
             }}
@@ -141,14 +216,15 @@ export function BottomNav({ active, onChange }: NavigationProps) {
               <div style={{
                 position: 'absolute',
                 top: 0,
-                left: '25%',
-                right: '25%',
-                height: '2.5px',
+                left: '20%',
+                right: '20%',
+                height: '3px',
                 borderRadius: '0 0 var(--radius-full) var(--radius-full)',
                 background: 'var(--color-primary)',
+                boxShadow: '0 2px 8px var(--color-primary)',
               }} />
             )}
-            <Icon size={20} strokeWidth={isActive ? 2.2 : 1.6} />
+            <Icon size={19} strokeWidth={isActive ? 2.2 : 1.7} />
             <span style={{
               fontSize: '10px',
               fontWeight: isActive ? 'var(--weight-semibold)' : 'var(--weight-normal)',
@@ -175,7 +251,9 @@ export function MobileHeader({ title, subtitle, action }: MobileHeaderProps) {
     <header style={{
       padding: 'var(--space-3) var(--space-4)',
       borderBottom: '1px solid var(--border-light)',
-      background: 'var(--bg-surface)',
+      background: 'var(--bg-glass)',
+      backdropFilter: 'blur(12px)',
+      WebkitBackdropFilter: 'blur(12px)',
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'space-between',
@@ -183,7 +261,7 @@ export function MobileHeader({ title, subtitle, action }: MobileHeaderProps) {
       flexShrink: 0,
     }}>
       <div>
-        <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-bold)', lineHeight: 'var(--leading-tight)' }}>
+        <h1 style={{ fontSize: 'var(--text-lg)', fontWeight: 'var(--weight-bold)', lineHeight: 'var(--leading-tight)', color: 'var(--text-primary)' }}>
           {title}
         </h1>
         {subtitle && (
@@ -198,3 +276,4 @@ export function MobileHeader({ title, subtitle, action }: MobileHeaderProps) {
 }
 
 export { NAV_ITEMS };
+

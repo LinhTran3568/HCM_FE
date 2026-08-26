@@ -23,6 +23,7 @@ export function AnswerOption({ option, index, selected, correct, showResult, dis
   let textColor = 'var(--text-primary)';
   let labelBg = 'var(--bg-inset)';
   let labelColor = 'var(--text-muted)';
+  let shadow = 'var(--shadow-xs)';
 
   if (showResult) {
     if (correct) {
@@ -30,20 +31,23 @@ export function AnswerOption({ option, index, selected, correct, showResult, dis
       border = 'var(--color-success)';
       textColor = 'var(--color-success-text)';
       labelBg = 'var(--color-success)';
-      labelColor = 'var(--text-inverse)';
+      labelColor = '#FFFFFF';
+      shadow = '0 0 12px rgba(16, 185, 129, 0.2)';
     } else if (selected) {
       bg = 'var(--color-danger-soft)';
       border = 'var(--color-danger)';
       textColor = 'var(--color-danger-text)';
       labelBg = 'var(--color-danger)';
-      labelColor = 'var(--text-inverse)';
+      labelColor = '#FFFFFF';
+      shadow = '0 0 12px rgba(239, 68, 68, 0.2)';
     }
   } else if (selected) {
     bg = 'var(--color-primary-soft)';
     border = 'var(--color-primary)';
-    textColor = 'var(--color-primary-dark)';
+    textColor = 'var(--text-primary)';
     labelBg = 'var(--color-primary)';
-    labelColor = 'var(--text-inverse)';
+    labelColor = '#FFFFFF';
+    shadow = 'var(--shadow-glow)';
   }
 
   return (
@@ -57,10 +61,10 @@ export function AnswerOption({ option, index, selected, correct, showResult, dis
         alignItems: 'flex-start',
         gap: 'var(--space-3)',
         width: '100%',
-        padding: 'var(--space-3)',
+        padding: 'var(--space-3) var(--space-4)',
         background: bg,
         border: `1.5px solid ${border}`,
-        borderRadius: 'var(--radius-md)',
+        borderRadius: 'var(--radius-lg)',
         textAlign: 'left',
         color: textColor,
         fontSize: 'var(--text-base)',
@@ -68,26 +72,40 @@ export function AnswerOption({ option, index, selected, correct, showResult, dis
         transition: 'all var(--transition-fast)',
         cursor: disabled ? 'default' : 'pointer',
         minHeight: 'var(--option-min-height)',
+        boxShadow: shadow,
+      }}
+      onMouseEnter={(e) => {
+        if (!disabled && !selected) {
+          e.currentTarget.style.borderColor = 'var(--color-primary)';
+          e.currentTarget.style.background = 'var(--bg-hover)';
+        }
+      }}
+      onMouseLeave={(e) => {
+        if (!disabled && !selected) {
+          e.currentTarget.style.borderColor = border;
+          e.currentTarget.style.background = bg;
+        }
       }}
     >
       <span style={{
         display: 'inline-flex',
         alignItems: 'center',
         justifyContent: 'center',
-        width: '26px',
-        height: '26px',
-        borderRadius: 'var(--radius-sm)',
+        width: '28px',
+        height: '28px',
+        borderRadius: 'var(--radius-md)',
         background: labelBg,
         color: labelColor,
-        fontWeight: 'var(--weight-semibold)',
+        fontWeight: 'var(--weight-bold)',
         fontSize: 'var(--text-xs)',
         flexShrink: 0,
         marginTop: '1px',
         transition: 'all var(--transition-fast)',
+        boxShadow: 'var(--shadow-xs)',
       }}>
-        {showResult && correct ? <Check size={13} strokeWidth={2.5} /> : label}
+        {showResult && correct ? <Check size={14} strokeWidth={3} /> : label}
       </span>
-      <span style={{ flex: 1, paddingTop: '2px' }}>{option.text}</span>
+      <span style={{ flex: 1, paddingTop: '2px', fontWeight: selected ? 'var(--weight-semibold)' : 'var(--weight-normal)' }}>{option.text}</span>
     </button>
   );
 }
