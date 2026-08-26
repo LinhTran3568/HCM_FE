@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { BookOpen, ChevronRight, Trophy, RotateCcw } from 'lucide-react';
+import { BookOpen, ChevronLeft, ChevronRight, Trophy, RotateCcw } from 'lucide-react';
 import questions from '../data/questions.json';
 import type { Question, CardProgress } from '../config/types';
 import { loadProgress, saveProgress, ensureAllQuestionsHaveProgress } from '../storage/progressStorage';
@@ -35,6 +35,8 @@ export function HocPage() {
   const [answered, setAnswered] = useState(false);
   const [isWrong, setIsWrong] = useState(false);
   const [questionsAnswered, setQuestionsAnswered] = useState(0);
+  const [visited, setVisited] = useState<number[]>([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
   const initialized = useRef(false);
 
   const boxTable = buildBoxTable(settings.baseDistance, settings.streakToLearn);
@@ -49,10 +51,15 @@ export function HocPage() {
       .sort((a, b) => (a.box !== b.box ? a.box - b.box : a.lastSeenAt - b.lastSeenAt));
     setQueue(unlearned.map((p) => p.id));
     setQueueIndex(0);
+    if (unlearned.length > 0) {
+      setVisited([unlearned[0]]);
+      setHistoryIndex(0);
+    }
   }, []);
 
-  const currentQuestion = queue.length > 0 && queueIndex < queue.length
-    ? typedQuestions.find((q) => q.id === queue[queueIndex]) : null;
+  const currentQuestion = visited.length > 0 && historyIndex >= 0 && historyIndex < visited.length
+    ? typedQuestions.find((q) => q.id === visited[historyIndex]) ?? null
+    : null;
 
   const currentProgress = currentQuestion ? progress.find((p) => p.id === currentQuestion.id) : null;
   const learnedCount = progress.filter((p) => p.learned).length;
@@ -81,6 +88,27 @@ export function HocPage() {
   const handleNext = useCallback(() => {
     const q = currentQuestion;
     if (!q) return;
+
+    // If in the middle of history, just move forward
+    if (historyIndex < visited.length - 1) {
+      setHistoryIndex((i) => i + 1);
+      const nextId = visited[historyIndex + 1];
+      const nextQ = typedQuestions.find((qq) => qq.id === nextId);
+      setSelectedKey(null);
+      setAnswered(false);
+      setIsWrong(false);
+      // Advance queue past this question
+      if (nextQ) {
+        const up = progress.find((p) => p.id === q.id);
+        const newBox = up?.box ?? 0;
+        const newQueue = insertBackIntoQueue(queue, queueIndex, q.id, newBox, boxTable, progress);
+        setQueue(newQueue);
+        setQueueIndex(queueIndex);
+      }
+      return;
+    }
+
+    // At end of history — proceed normally
     const updatedProgress = progress.find((p) => p.id === q.id);
     const newBox = updatedProgress?.box ?? 0;
     let newQueue = insertBackIntoQueue(queue, queueIndex, q.id, newBox, boxTable, progress);
@@ -93,10 +121,28 @@ export function HocPage() {
     }
     setQueue(newQueue);
     setQueueIndex(queueIndex);
+
+    // Append next question to history
+    if (queueIndex + 1 < newQueue.length) {
+      setVisited((v) => [...v, newQueue[queueIndex + 1]]);
+      setHistoryIndex((i) => i + 1);
+    } else {
+      setVisited((v) => [...v, q.id]);
+      setHistoryIndex((i) => i + 1);
+    }
+
     setSelectedKey(null);
     setAnswered(false);
     setIsWrong(false);
-  }, [currentQuestion, progress, queue, queueIndex, boxTable, questionsAnswered, learnedCount]);
+  }, [currentQuestion, progress, queue, queueIndex, boxTable, questionsAnswered, learnedCount, historyIndex, visited]);
+
+  const handlePrev = useCallback(() => {
+    if (historyIndex <= 0) return;
+    setHistoryIndex((i) => i - 1);
+    setSelectedKey(null);
+    setAnswered(false);
+    setIsWrong(false);
+  }, [historyIndex]);
 
   // Keyboard shortcuts
   useEffect(() => {
@@ -106,13 +152,14 @@ export function HocPage() {
         const keyMap: Record<string, string> = { '1': 'a', '2': 'b', '3': 'c', '4': 'd', a: 'a', b: 'b', c: 'c', d: 'd' };
         const mapped = keyMap[e.key.toLowerCase()];
         if (mapped) handleSelect(mapped);
+        if (e.key === 'ArrowLeft') handlePrev();
       } else if (e.key === 'Enter' || e.key === 'ArrowRight') {
         handleNext();
       }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [answered, handleSelect, handleNext]);
+  }, [answered, handleSelect, handleNext, handlePrev]);
 
   /* ── Empty state ── */
   if (queue.length === 0) {
@@ -186,6 +233,32 @@ export function HocPage() {
           flexDirection: 'column',
           gap: 'var(--space-4)',
         }}>
+          {/* Back button */}
+          {historyIndex > 0 && (
+            <button
+              onClick={handlePrev}
+              aria-label="Câu trước"
+              style={{
+                display: 'inline-flex',
+                alignItems: 'center',
+                gap: 'var(--space-1)',
+                fontSize: 'var(--text-xs)',
+                color: 'var(--text-muted)',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
+                padding: '2px 0',
+                width: 'fit-content',
+                transition: 'color var(--transition-fast)',
+              }}
+              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--text-primary)'; }}
+              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--text-muted)'; }}
+            >
+              <ChevronLeft size={14} />
+              Câu trước
+            </button>
+          )}
+
           {/* Question number */}
           <div style={{
             display: 'inline-flex',
