@@ -1,0 +1,338 @@
+import { useState, useCallback } from 'react';
+import { ClipboardCheck, Play, ChevronLeft, ChevronRight, Trophy } from 'lucide-react';
+import questions from '../data/questions.json';
+import type { Question } from '../config/types';
+import { loadProgress, ensureAllQuestionsHaveProgress } from '../storage/progressStorage';
+import { addTestResult } from '../storage/settingsStorage';
+import { useTheme } from '../theme/ThemeContext';
+import { buildBoxTable } from '../config/srsConfig';
+import { processAnswer } from '../srs/srsEngine';
+import { AnswerOption } from '../ui/AnswerOption';
+import { Button, Card, Input, StatCard, FilterChip } from '../ui/index';
+import { MobileHeader } from '../ui/Navigation';
+import { ResultList } from '../components/ResultList';
+
+const typedQuestions = questions as Question[];
+type Phase = 'setup' | 'test' | 'result';
+
+interface Answer {
+  questionId: number;
+  selected: string;
+  correct: boolean;
+}
+
+/* ════════════════════════════════════════════
+   TEST PAGE — Exam Setup + Exam Interface
+   ════════════════════════════════════════════ */
+
+export function KiemTraPage() {
+  const { settings } = useTheme();
+  const [phase, setPhase] = useState<Phase>('setup');
+  const [testQuestions, setTestQuestions] = useState<Question[]>([]);
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [answers, setAnswers] = useState<Answer[]>([]);
+  const [selectedKey, setSelectedKey] = useState<string | null>(null);
+  const [answered, setAnswered] = useState(false);
+  const [resultFilter, setResultFilter] = useState<'all' | 'wrong'>('all');
+  const [customCount, setCustomCount] = useState('');
+  const [source, setSource] = useState<'all' | 'unlearned' | 'learned'>('all');
+
+  const boxTable = buildBoxTable(settings.baseDistance, settings.streakToLearn);
+
+  const getPool = useCallback((src: 'all' | 'unlearned' | 'learned') => {
+    if (src === 'all') return typedQuestions.filter((q) => q.correctKey);
+    const prog = ensureAllQuestionsHaveProgress(loadProgress(), typedQuestions.map((q) => q.id));
+    if (src === 'unlearned') {
+      return typedQuestions.filter((q) => {
+        if (!q.correctKey) return false;
+        const p = prog.find((p) => p.id === q.id);
+        return p && !p.learned;
+      });
+    }
+    return typedQuestions.filter((q) => {
+      if (!q.correctKey) return false;
+      const p = prog.find((p) => p.id === q.id);
+      return p && p.learned;
+    });
+  }, []);
+
+  const startTest = useCallback((count: number, src: 'all' | 'unlearned' | 'learned') => {
+    const pool = getPool(src);
+    const shuffled = [...pool].sort(() => Math.random() - 0.5);
+    const selected = shuffled.slice(0, Math.min(count, shuffled.length));
+    if (selected.length === 0) { alert('Không có câu hỏi phù hợp.'); return; }
+    setTestQuestions(selected);
+    setCurrentIndex(0);
+    setAnswers([]);
+    setSelectedKey(null);
+    setAnswered(false);
+    setPhase('test');
+  }, [getPool]);
+
+  const handleStart = useCallback(() => {
+    const n = parseInt(customCount, 10);
+    if (!n || n < 1) { alert('Nhập số câu hỏi hợp lệ.'); return; }
+    startTest(n, source);
+  }, [customCount, source, startTest]);
+
+  const handleSelect = useCallback((key: string) => {
+    if (answered) return;
+    setSelectedKey(key);
+    setAnswered(true);
+    const q = testQuestions[currentIndex];
+    if (!q) return;
+    const isCorrect = key === q.correctKey;
+    setAnswers((prev) => [...prev, { questionId: q.id, selected: key, correct: isCorrect }]);
+    // Update progress
+    const prog = ensureAllQuestionsHaveProgress(loadProgress(), typedQuestions.map((q) => q.id));
+    const pIdx = prog.findIndex((p) => p.id === q.id);
+    if (pIdx !== -1) {
+      prog[pIdx] = processAnswer(prog[pIdx], isCorrect, boxTable, settings.streakToLearn);
+      try { localStorage.setItem('hcm202_progress_v1', JSON.stringify(prog)); } catch { /* */ }
+    }
+  }, [answered, testQuestions, currentIndex, boxTable, settings.streakToLearn]);
+
+  const handleNext = useCallback(() => {
+    if (currentIndex < testQuestions.length - 1) {
+      setCurrentIndex((prev) => prev + 1);
+      setSelectedKey(null);
+      setAnswered(false);
+    }
+  }, [currentIndex, testQuestions.length]);
+
+  const handlePrev = useCallback(() => {
+    if (currentIndex > 0) {
+      setCurrentIndex((prev) => prev - 1);
+      setSelectedKey(answers[currentIndex - 1]?.selected ?? null);
+      setAnswered(true);
+    }
+  }, [currentIndex, answers]);
+
+  const handleSubmit = useCallback(() => {
+    if (answers.length < testQuestions.length) {
+      if (!window.confirm('Bạn chắc chắn nộp bài?')) return;
+    }
+    addTestResult({
+      date: new Date().toISOString(),
+      total: testQuestions.length,
+      correct: answers.filter((a) => a.correct).length,
+      answers,
+    });
+    setPhase('result');
+  }, [answers, testQuestions.length]);
+
+  /* ── SETUP PHASE ── */
+  if (phase === 'setup') {
+    const pool = getPool(source);
+    const QUICK_COUNTS = [10, 20, 50, 100];
+
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <MobileHeader title="Kiểm tra" subtitle="Tự kiểm tra kiến thức" />
+
+        <div style={{ flex: 1, overflow: 'auto', padding: 'var(--space-5) var(--space-4)' }}>
+          <div style={{ maxWidth: '560px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
+
+            {/* Source selector */}
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-semibold)', color: 'var(--text-muted)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 'var(--space-3)' }}>
+                Nguồn câu hỏi
+              </label>
+              <div style={{ display: 'flex', gap: 'var(--space-2)', flexWrap: 'wrap' as const }}>
+                {([
+                  { key: 'all' as const, label: 'Tất cả', count: typedQuestions.filter((q) => q.correctKey).length },
+                  { key: 'unlearned' as const, label: 'Chưa thuộc' },
+                  { key: 'learned' as const, label: 'Đã thuộc' },
+                ]).map((opt) => (
+                  <FilterChip key={opt.key} active={source === opt.key} count={opt.count} onClick={() => setSource(opt.key)}>
+                    {opt.label}
+                  </FilterChip>
+                ))}
+              </div>
+            </div>
+
+            {/* Number of questions */}
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-semibold)', color: 'var(--text-muted)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 'var(--space-3)' }}>
+                Số câu hỏi
+              </label>
+              <div style={{ display: 'flex', gap: 'var(--space-3)', alignItems: 'flex-end' }}>
+                <div style={{ flex: 1 }}>
+                  <Input
+                    type="number"
+                    min={1}
+                    max={pool.length}
+                    value={customCount}
+                    onChange={(e) => setCustomCount(e.target.value)}
+                    placeholder={`Tối đa ${pool.length}`}
+                    onKeyDown={(e) => { if (e.key === 'Enter') handleStart(); }}
+                  />
+                </div>
+                <Button variant="primary" size="lg" onClick={handleStart} icon={<Play size={16} />}>
+                  Bắt đầu
+                </Button>
+              </div>
+              <p style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: 'var(--space-2)' }}>
+                Nhập số tuỳ ý hoặc chọn nhanh bên dưới
+              </p>
+            </div>
+
+            {/* Quick presets */}
+            <div>
+              <label style={{ display: 'block', fontSize: 'var(--text-xs)', fontWeight: 'var(--weight-semibold)', color: 'var(--text-muted)', textTransform: 'uppercase' as const, letterSpacing: '0.06em', marginBottom: 'var(--space-3)' }}>
+                Chọn nhanh
+              </label>
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 'var(--space-2)' }}>
+                {QUICK_COUNTS.map((n) => (
+                  <Card
+                    key={n}
+                    hoverable
+                    onClick={() => startTest(n, source)}
+                    style={{ textAlign: 'center' as const, padding: 'var(--space-4)' }}
+                  >
+                    <div style={{ fontSize: 'var(--text-xl)', fontWeight: 'var(--weight-bold)', color: 'var(--text-primary)' }}>{n}</div>
+                    <div style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)', marginTop: '2px' }}>câu hỏi</div>
+                  </Card>
+                ))}
+              </div>
+            </div>
+
+            {/* Info card */}
+            <Card style={{ background: 'var(--color-info-soft)', borderColor: 'var(--color-info)' }}>
+              <div style={{ fontSize: 'var(--text-sm)', color: 'var(--color-info)', lineHeight: 'var(--leading-relaxed)' }}>
+                Kết quả kiểm tra sẽ cập nhật tiến độ học tập. Câu trả lời đúng/sai đều được ghi nhận vào hệ thống lặp lại ngắt quãng.
+              </div>
+            </Card>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  /* ── RESULT PHASE ── */
+  if (phase === 'result') {
+    return (
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <MobileHeader
+          title="Kết quả"
+          action={
+            <Button variant="secondary" size="sm" onClick={() => setPhase('setup')}>
+              Làm mới
+            </Button>
+          }
+        />
+        <div style={{ flex: 1, overflow: 'auto' }}>
+          <ResultList
+            questions={typedQuestions}
+            answers={answers}
+            filter={resultFilter}
+            onFilterChange={setResultFilter}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  /* ── TEST PHASE ── */
+  const currentQ = testQuestions[currentIndex];
+  const progressPct = Math.round(((currentIndex + (answered ? 1 : 0)) / testQuestions.length) * 100);
+
+  return (
+    <div style={{ flex: 1, display: 'flex', flexDirection: 'column', height: '100dvh', overflow: 'hidden' }}>
+      {/* Top bar */}
+      <div style={{
+        padding: 'var(--space-3) var(--space-4)',
+        borderBottom: '1px solid var(--border-light)',
+        background: 'var(--bg-surface)',
+        flexShrink: 0,
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 'var(--space-2)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)' }}>
+            <span style={{ fontSize: 'var(--text-sm)', fontWeight: 'var(--weight-semibold)', color: 'var(--text-primary)' }}>
+              {currentIndex + 1}/{testQuestions.length}
+            </span>
+            <span style={{ fontSize: 'var(--text-xs)', color: 'var(--text-muted)' }}>
+              · {answers.filter((a) => a.correct).length} đúng
+            </span>
+          </div>
+          <Button variant="primary" size="sm" onClick={handleSubmit}>
+            Nộp bài
+          </Button>
+        </div>
+        <div style={{ height: '3px', borderRadius: 'var(--radius-full)', background: 'var(--bg-inset)', overflow: 'hidden' }}>
+          <div style={{
+            width: `${progressPct}%`,
+            height: '100%',
+            background: 'var(--color-primary)',
+            transition: 'width 0.2s ease',
+          }} />
+        </div>
+      </div>
+
+      {/* Question */}
+      {currentQ && (
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+          <div style={{
+            flex: 1,
+            overflow: 'auto',
+            padding: 'var(--space-5) var(--space-4)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: 'var(--space-5)',
+            maxWidth: '640px',
+            width: '100%',
+            margin: '0 auto',
+          }}>
+            <div style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: 'var(--space-2)',
+              fontSize: 'var(--text-xs)',
+              fontWeight: 'var(--weight-semibold)',
+              color: 'var(--color-primary)',
+              textTransform: 'uppercase' as const,
+              letterSpacing: '0.06em',
+            }}>
+              <div style={{ width: '6px', height: '6px', borderRadius: '50%', background: 'var(--color-primary)' }} />
+              Câu {currentQ.id}
+            </div>
+            <div style={{ fontSize: 'var(--text-lg)', lineHeight: 'var(--leading-relaxed)', fontWeight: 'var(--weight-medium)' }}>
+              {currentQ.question}
+            </div>
+            <div role="radiogroup" style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-2)' }}>
+              {currentQ.options.map((opt, i) => (
+                <AnswerOption
+                  key={opt.key}
+                  option={opt}
+                  index={i}
+                  selected={selectedKey === opt.key}
+                  correct={false}
+                  showResult={false}
+                  disabled={answered}
+                  onClick={() => handleSelect(opt.key)}
+                />
+              ))}
+            </div>
+          </div>
+
+          {/* Bottom nav */}
+          <div style={{
+            padding: 'var(--space-3) var(--space-4)',
+            borderTop: '1px solid var(--border-light)',
+            background: 'var(--bg-surface)',
+            flexShrink: 0,
+          }}>
+            <div style={{ display: 'flex', gap: 'var(--space-2)', maxWidth: '640px', margin: '0 auto' }}>
+              <Button variant="secondary" fullWidth onClick={handlePrev} disabled={currentIndex === 0} icon={<ChevronLeft size={16} />}>
+                Trước
+              </Button>
+              <Button variant="primary" fullWidth onClick={handleNext} disabled={currentIndex >= testQuestions.length - 1} icon={<ChevronRight size={16} />}>
+                Tiếp
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}

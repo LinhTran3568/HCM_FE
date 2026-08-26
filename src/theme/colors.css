@@ -1,0 +1,257 @@
+/*
+ * HCM202 Design Tokens
+ * Modern Academic Learning App
+ * Warm sage-green primary, calm neutrals
+ */
+
+:root {
+  /* ── Brand ── */
+  --color-primary: #4A7C59;
+  --color-primary-hover: #3D6A4B;
+  --color-primary-active: #2E5538;
+  --color-primary-soft: #E8F0EA;
+  --color-primary-dark: #1C3A24;
+
+  /* ── Surfaces ── */
+  --bg-base: #F4F2EE;
+  --bg-surface: #FFFFFF;
+  --bg-elevated: #FFFFFF;
+  --bg-inset: #EDEAE4;
+  --bg-hover: #F0EDE8;
+  --bg-page: #F4F2EE;
+
+  /* ── Borders ── */
+  --border-light: #E5E2DC;
+  --border-default: #D5D0C8;
+  --border-strong: #BBB5AB;
+  --border-focus: var(--color-primary);
+
+  /* ── Text ── */
+  --text-primary: #1B1916;
+  --text-secondary: #5C564E;
+  --text-muted: #8A8480;
+  --text-inverse: #FFFFFF;
+  --text-link: var(--color-primary);
+
+  /* ── Semantic ── */
+  --color-success: #3D8B5E;
+  --color-success-soft: #E3F2E8;
+  --color-success-text: #1A5C33;
+  --color-warning: #C49000;
+  --color-warning-soft: #FDF3D7;
+  --color-warning-text: #7A5800;
+  --color-danger: #C75050;
+  --color-danger-soft: #FBEAEA;
+  --color-danger-text: #8B2F2F;
+  --color-info: #4A7C99;
+  --color-info-soft: #E4EFF5;
+
+  /* ── Shadows (2 levels) ── */
+  --shadow-xs: 0 1px 2px rgba(27, 25, 22, 0.04);
+  --shadow-sm: 0 1px 3px rgba(27, 25, 22, 0.06), 0 1px 2px rgba(27, 25, 22, 0.04);
+  --shadow-md: 0 4px 12px rgba(27, 25, 22, 0.08), 0 1px 3px rgba(27, 25, 22, 0.04);
+  --shadow-lg: 0 8px 24px rgba(27, 25, 22, 0.1), 0 2px 6px rgba(27, 25, 22, 0.04);
+
+  /* ── Radius ── */
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 999px;
+
+  /* ── Spacing (4px base) ── */
+  --space-0: 0;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+
+  /* ── Typography ── */
+  --font-sans: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", sans-serif;
+  --font-mono: "SF Mono", "Cascadia Code", "Fira Code", Consolas, monospace;
+
+  --text-xs: 0.6875rem;    /* 11px */
+  --text-sm: 0.8125rem;    /* 13px */
+  --text-base: 0.9375rem;  /* 15px */
+  --text-lg: 1.0625rem;    /* 17px */
+  --text-xl: 1.25rem;      /* 20px */
+  --text-2xl: 1.5rem;      /* 24px */
+  --text-3xl: 1.875rem;    /* 30px */
+  --text-display: 2.25rem; /* 36px */
+
+  --leading-tight: 1.25;
+  --leading-normal: 1.55;
+  --leading-relaxed: 1.7;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+
+  /* ── Layout ── */
+  --content-max-width: 1200px;
+  --sidebar-width: 240px;
+  --header-height: 56px;
+  --nav-height: 56px;
+  --option-min-height: 48px;
+
+  /* ── Transitions ── */
+  --transition-fast: 100ms ease;
+  --transition-base: 150ms ease;
+  --transition-slow: 250ms ease;
+
+  /* ── Font scale (for accessibility) ── */
+  --font-scale: 1;
+}
+
+/* ── Dark Theme ── */
+:root[data-theme="dark"] {
+  --color-primary: #6FAF7E;
+  --color-primary-hover: #5E9E6D;
+  --color-primary-active: #4D8D5C;
+  --color-primary-soft: #1A2E1F;
+  --color-primary-dark: #B8E0C2;
+
+  --bg-base: #0E0E0E;
+  --bg-surface: #181818;
+  --bg-elevated: #1E1E1E;
+  --bg-inset: #131313;
+  --bg-hover: #222222;
+  --bg-page: #0E0E0E;
+
+  --border-light: #262626;
+  --border-default: #303030;
+  --border-strong: #404040;
+
+  --text-primary: #EAE8E3;
+  --text-secondary: #A09A92;
+  --text-muted: #6B6660;
+  --text-inverse: #1B1916;
+
+  --color-success: #5AAF72;
+  --color-success-soft: #162A1D;
+  --color-success-text: #A8DFB8;
+  --color-warning: #D4A84A;
+  --color-warning-soft: #2A2210;
+  --color-warning-text: #E8D08A;
+  --color-danger: #E06060;
+  --color-danger-soft: #2A1515;
+  --color-danger-text: #F0A8A8;
+  --color-info: #6A9CB8;
+  --color-info-soft: #152028;
+
+  --shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.3), 0 1px 2px rgba(0, 0, 0, 0.2);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.35), 0 1px 3px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.4), 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* ── Global Reset ── */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html {
+  font-size: calc(16px * var(--font-scale));
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: var(--leading-normal);
+  color: var(--text-primary);
+  background: var(--bg-base);
+  min-height: 100dvh;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+#root {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  cursor: pointer;
+  border: none;
+  background: none;
+  color: inherit;
+  line-height: inherit;
+}
+
+input,
+textarea,
+select {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+
+/* ── Focus ── */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* ── Scrollbar ── */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-default);
+  border-radius: var(--radius-full);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-strong);
+}
+
+/* ── Reduced Motion ── */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* ── Responsive utilities ── */
+@media (min-width: 768px) {
+  :root {
+    --text-base: 0.9375rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  :root {
+    --text-base: 1rem;
+  }
+}
