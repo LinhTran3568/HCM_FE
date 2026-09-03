@@ -8,7 +8,7 @@ import { ToanBoPage } from './pages/ToanBoPage';
 import { CaiDatPage } from './pages/CaiDatPage';
 import type { TabId } from './config/types';
 
-const INTRO_SEEN_KEY = 'hcm202_intro_seen';
+const INTRO_SEEN_KEY = 'vnr201_intro_seen';
 
 /* ════════════════════════════════════════════
    APP SHELL — Responsive Layout

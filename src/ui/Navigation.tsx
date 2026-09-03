@@ -79,7 +79,7 @@ export function Sidebar({ active, onChange }: NavigationProps) {
             letterSpacing: '-0.02em',
             lineHeight: 1.1,
           }}>
-            HCM202
+            VNR201
           </div>
           <div style={{
             fontSize: 'var(--text-xs)',
@@ -87,7 +87,7 @@ export function Sidebar({ active, onChange }: NavigationProps) {
             marginTop: '2px',
             fontWeight: 'var(--weight-medium)',
           }}>
-            Tư tưởng Hồ Chí Minh
+            Lịch sử Đảng Cộng sản Việt Nam
           </div>
         </div>
       </div>

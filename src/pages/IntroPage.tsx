@@ -17,7 +17,15 @@ export function IntroPage({ onEnter }: IntroPageProps) {
     const learned = progress.filter((p) => p.learned).length;
     const total = typedQuestions.length;
     const pct = total > 0 ? Math.round((learned / total) * 100) : 0;
-    const boxCounts = [0, 1, 2, 3, 4].map((boxNum) => progress.filter((p) => p.box === boxNum).length);
+    const boxCounts = [1, 2, 3, 4, 5].map((boxNum) => {
+      if (boxNum === 1) {
+        return progress.filter((p) => p.box <= 1 && !p.learned).length;
+      }
+      if (boxNum === 5) {
+        return progress.filter((p) => p.learned || p.box >= 5).length;
+      }
+      return progress.filter((p) => p.box === boxNum && !p.learned).length;
+    });
     return { learned, total, pct, boxCounts };
   }, []);
 
@@ -72,7 +80,7 @@ export function IntroPage({ onEnter }: IntroPageProps) {
           marginBottom: 'var(--space-4)',
         }}>
           <Sparkles size={14} />
-          Hệ Thống Ôn Luyện Tư Tưởng Hồ Chí Minh — HCM202
+          Hệ Thống Ôn Luyện Lịch Sử Đảng Cộng sản Việt Nam — VNR201
         </div>
 
         {/* Title */}
@@ -95,7 +103,7 @@ export function IntroPage({ onEnter }: IntroPageProps) {
           lineHeight: 'var(--leading-relaxed)',
           marginBottom: 'var(--space-6)',
         }}>
-          Ứng dụng thiết kế chuyên biệt cho môn học HCM202 giúp bạn ghi nhớ bền vững toàn bộ ngân hàng câu hỏi thông qua phương pháp Leitner SRS chuẩn hóa.
+          Ứng dụng thiết kế chuyên biệt cho môn học VNR201 giúp bạn ghi nhớ bền vững toàn bộ ngân hàng câu hỏi thông qua phương pháp Leitner SRS chuẩn hóa.
         </p>
 
         {/* Hero Actions */}

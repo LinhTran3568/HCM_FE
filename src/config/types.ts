@@ -49,9 +49,9 @@ export const DEFAULT_SETTINGS: AppSettings = {
 };
 
 export const STORAGE_KEYS = {
-  PROGRESS: 'hcm202_progress_v1',
-  SETTINGS: 'hcm202_settings_v1',
-  THEME: 'hcm202_theme',
+  PROGRESS: 'vnr201_progress_v1',
+  SETTINGS: 'vnr201_settings_v1',
+  THEME: 'vnr201_theme',
 } as const;
 
 export type TabId = 'intro' | 'hoc' | 'kiemtra' | 'toanbo' | 'caidat';

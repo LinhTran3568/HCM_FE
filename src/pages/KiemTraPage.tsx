@@ -2,7 +2,7 @@ import { useState, useCallback } from 'react';
 import { ClipboardCheck, Play, ChevronLeft, ChevronRight, CheckCircle, Send } from 'lucide-react';
 import questions from '../data/questions.json';
 import type { Question } from '../config/types';
-import { loadProgress, ensureAllQuestionsHaveProgress } from '../storage/progressStorage';
+import { loadProgress, saveProgress, ensureAllQuestionsHaveProgress } from '../storage/progressStorage';
 import { addTestResult } from '../storage/settingsStorage';
 import { useTheme } from '../theme/ThemeContext';
 import { buildBoxTable } from '../config/srsConfig';
@@ -123,7 +123,7 @@ export function KiemTraPage() {
         }
       }
     });
-    try { localStorage.setItem('hcm202_progress_v1', JSON.stringify(prog)); } catch { /* */ }
+    saveProgress(prog);
 
     addTestResult({
       date: new Date().toISOString(),
